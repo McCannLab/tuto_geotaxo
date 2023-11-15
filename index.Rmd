@@ -1,0 +1,188 @@
+---
+title: "Template R workshop"
+author: "inSileco Team"
+date: 2021-04-13
+output:
+  xaringan::moon_reader:
+    css: [default, rd.css, rd-font.css, "hygge"]
+    lib_dir: assets
+    seal: false
+    nature:
+      highlightStyle: dracula
+      countIncrementalSlides: false
+      beforeInit: "macros.js"
+---
+
+
+```{r setup, include = FALSE}
+source("_setup.R")
+# knitr::clean_cache(TRUE)
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #37abc8\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+xaringanExtra::use_scribble()
+```
+
+
+class: title-slide, middle
+
+
+## .font140[`r rp()`eproducible]
+
+<br>
+
+.instructors[
+  .font180[`r rp()` Workshop]
+  <br><br><br>
+  .authors140[Kevin Cazelles]
+  <br><br>
+  `r format(Sys.time(), '%B %d, %Y')`
+  <br>
+  .font200[
+  [`r gh()`](https://github.com/McCannLab/tuto_geotaxo)
+  [`r db()`](link_to_data)
+  ]
+]
+
+<br>
+<img src="img/logoW.png" width="140px"></img>
+
+<!-- Modify accordingly -->
+![deploy workshop](https://github.com/McCannLab/tuto_geotaxo/workflows/deploy%20workshop/badge.svg)
+
+.instructors[Content under [`r rfa("creative-commons")` `r rfa("creative-commons-by")`](https://creativecommons.org/licenses/by/4.0/) unless otherwise specified.]
+
+
+
+---
+
+class: inverse, center, middle
+
+# `r rp()` package `geodata`
+
+![:custom_hr]()
+
+
+---
+# Geodata
+
+- Quickly retrieve spatial data
+- `r gh()` https://github.com/rspatial/geodata
+- `r bk()` [Geocomputing with R](https://r.geocompx.org/)
+
+---
+# Geodata
+
+- Getting administrative boundaries 
+
+```R 
+install.packages(c("geodata", "terra", "tidyterra"))
+library("geodata")
+library("terra")
+library("tidyterra")
+
+ont <- geodata::gadm("CAN", 1, path = ".") |>
+  filter(NAME_1 == "Ontario")
+
+plot(ont)
+```
+
+---
+# Geodata
+
+- Getting elevation data
+
+
+```R 
+elv <- geodata::elevation_30s("CAN", path = "tmp")
+plot(elv)
+
+elv_ont <- terra::crop(elv, ont)
+plot(elv_ont)
+```
+
+
+---
+
+class: inverse, center, middle
+
+# `r rp()` package `taxize`
+
+![:custom_hr]()
+
+
+---
+# Taxize
+
+- `r gh()` https://github.com/ropensci/taxize
+- `r rfa("html5")` https://docs.ropensci.org/taxize/
+- `r bk()` https://books.ropensci.org/taxize/
+
+
+> taxize allows users to search over many taxonomic data sources for species names (scientific and common) and download up and downstream taxonomic hierarchical information - among other things.
+
+```R
+install.packages("taxize")
+library(taxize)
+```
+
+
+---
+# Taxize 
+
+
+## Common interface to several databases 
+
+## Rapid and efficient name cleaning 
+
+## Retrieve classification details 
+
+## Unique identifier to species 
+
+
+---
+# Databases
+
+- https://books.ropensci.org/taxize/data-sources.html
+
+
+---
+# Example -- cleaning names 
+
+```R
+res1 <- resolve("Coregonus artd")
+res2 <- resolve("Coregonus artedi")
+max(res1$gnr$score)
+max(res2$gnr$score)
+```
+
+
+---
+# Example -- unique identifier with ITIS 
+
+
+tsn = Taxonomic Serial Number (TSN) 
+
+```R
+res <- get_tsn(c(
+  "Catostomus commersonii", "Coregonus artedi", "Perca flavescens",
+  "Lota lota"
+))
+res |> as.tsn()
+```
+
+
+
+---
+# Example classification with ITIS
+
+https://www.itis.gov/
+
+```R
+it <- classification("Coregonus artedi", db = "itis")
+res |> classification()
+```
